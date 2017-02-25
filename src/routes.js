@@ -4,8 +4,8 @@
 angular.module('MenuApp')
 .config(RoutesConfig);
 
-RoutesConfig.$inject = ['$stateProvider', '$urlRouteProvider'];
-function RoutesConfig($stateProvider, $urlRouteProvider) {
+RoutesConfig.$inject = ['$stateProvider', '$urlRouterProvider'];
+function RoutesConfig($stateProvider, $urlRouterProvider) {
 
   // Redirect to home page if no other URL matches
   $urlRouterProvider.otherwise('/');
@@ -16,20 +16,34 @@ function RoutesConfig($stateProvider, $urlRouteProvider) {
   // Home page
   .state('home', {
     url: '/',
-    template: 'src/templates/home.template.html'
+    templateUrl: 'src/templates/home.template.html'
 
   })
 
   // categories page
-  .state('categories' {
-    url: '/categories'
-
+  .state('categories', {
+    url: '/categories',
+    templateUrl: 'src/templates/categories.template.html',
+    controller: 'CategoriesController as categoriesList',
+    resolve: {
+        items: ['MenuDataService', function(MenuDataService){
+            return MenuDataService.getAllCategories();
+        }]
+    }
   })
 
   // menu items page
-  .state('items' {
-    url: "/categories/items"
-  })
+  .state('items', {
+    url: "/categories/{itemShortName}",
+    templateUrl: 'src/templates/items.template.html',
+    controller: 'ItemsController as itemsList',
+    resolve: {
+      items: ['$stateParams','MenuDataService', function($stateParams, MenuDataService){
+          //console.log($stateParams.itemShortName);
+          return MenuDataService.getItemsForCategory($stateParams.itemShortName);
+      }]
+    }
+  });
 
 
 };
